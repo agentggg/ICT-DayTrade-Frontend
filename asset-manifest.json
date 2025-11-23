@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/ICT-DayTrade-Frontend/static/css/main.baa8c1f2.css",
-    "main.js": "/ICT-DayTrade-Frontend/static/js/main.09f501de.js",
+    "main.js": "/ICT-DayTrade-Frontend/static/js/main.6e961125.js",
     "static/js/453.f183338e.chunk.js": "/ICT-DayTrade-Frontend/static/js/453.f183338e.chunk.js",
     "index.html": "/ICT-DayTrade-Frontend/index.html",
     "main.baa8c1f2.css.map": "/ICT-DayTrade-Frontend/static/css/main.baa8c1f2.css.map",
-    "main.09f501de.js.map": "/ICT-DayTrade-Frontend/static/js/main.09f501de.js.map",
+    "main.6e961125.js.map": "/ICT-DayTrade-Frontend/static/js/main.6e961125.js.map",
     "453.f183338e.chunk.js.map": "/ICT-DayTrade-Frontend/static/js/453.f183338e.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.baa8c1f2.css",
-    "static/js/main.09f501de.js"
+    "static/js/main.6e961125.js"
   ]
 }
