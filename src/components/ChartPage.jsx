@@ -1,20 +1,52 @@
 // src/pages/ChartPage.jsx
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import CandleChart from "../reuseable/CandleChart";
 import getIpAddress from "../config";
 import axios from "axios";
 import "./ChartPage.css";
+import { useLocation } from "react-router-dom";
 
 const WINDOW = 200;
 const ipAddress = getIpAddress();
 
-const TIMEFRAMES = ["1m", "5m", "15m", "1h"];
+const TIMEFRAMES = ["1m", "3m", "5m", "15m", "1h"];
 
+const MODE_CONFIG = {
+  fvg: {
+    id: "fvg",
+    title: "Fair Value Gaps",
+    endpoint: "check_fvg",
+    actions: [{ key: "fvg", label: "Check FVG" }],
+    candle_amount: 3
+  },
+  ob: {
+    id: "ob",
+    title: "Order Blocks",
+    endpoint: "check_order_block",
+    actions: [
+      { key: "ob_bull", label: "Bullish Order Block", direction: "bullish" },
+      { key: "ob_bear", label: "Bearish Order Block", direction: "bearish" },
+    ],
+    candle_amount: 13
+  },
+  bb: {
+    id: "bb",
+    title: "Breaker Blocks",
+    endpoint: "check_bb",
+    actions: [{ key: "bb", label: "Check Breaker Block" }],
+  },
+};
+ 
 const ChartPage = () => {
+  const location = useLocation();
+  const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const mode = params.get("mode") || "fvg";
+  const modeConfig = MODE_CONFIG[mode] || MODE_CONFIG.fvg;
+
   const [candles, setCandles] = useState([]);
-  const [timeframe, setTimeframe] = useState("5m");
+  const [timeframe, setTimeframe] = useState("3m");
   const [isLoading, setIsLoading] = useState(false);
-  const [checking, setChecking] = useState(null); // "FVG" | "Bullish OB" | "Bearish OB" | null
+  const [checking, setChecking] = useState(null); // holds current checking label
   const [lastResult, setLastResult] = useState(null);
 
   const fetchCandles = useCallback(
@@ -23,7 +55,7 @@ const ChartPage = () => {
         setIsLoading(true);
 
         const res = await fetch(
-          `${ipAddress}/fvg_data/?instrument=GBPUSD&timeframe=${tf}`
+          `${ipAddress}/get_candles/?instrument=GBPUSD&timeframe=${tf}&amount=${modeConfig.candle_amount}`
         );
         const data_res = await res.json();
 
@@ -46,44 +78,39 @@ const ChartPage = () => {
         setIsLoading(false);
       }
     },
-    [timeframe]
+    // intentionally not depending on timeframe — tf is passed explicitly
+    []
   );
 
   useEffect(() => {
-    fetchCandles("5m");
-  }, [fetchCandles]);
+    fetchCandles(timeframe);
+  }, [fetchCandles, timeframe]);
 
-  const handleClick = async (type, direction) => {
+  const handleAction = async (action) => {
     if (!candles.length) return;
 
+    const label = action.label || action.key;
     try {
-      if (type === "fvg") {
-        setChecking("FVG");
-        const response = await axios.post(`${ipAddress}/check_fvg/`, {
-          candles,
-        });
-        const isFvg = !!response.data.is_fvg;
-        setLastResult(`FVG · ${isFvg ? "YES ✅" : "NO ❌"}`);
-        alert(isFvg ? "Yes, this is an FVG ✅" : "No FVG here ❌");
-      } else if (type === "ob") {
-        const label =
-          direction === "bullish" ? "Bullish Order Block" : "Bearish Order Block";
-        setChecking(label);
+      setChecking(label);
 
-        const payload = {
-          direction,
-          candles,
-        };
+      const payload = { candles };
+      if (action.direction) payload.direction = action.direction;
 
-        const res = await axios.post(`${ipAddress}/check_order_block/`, payload);
-        // backend returns { ok: true/false }
-        const isOb = res.data.ok ?? res.data.is_order_block ?? false;
+      const response = await axios.post(`${ipAddress}/${modeConfig.endpoint}/`, payload);
 
-        setLastResult(`${label} · ${isOb ? "YES ✅" : "NO ❌"}`);
-        alert(isOb ? `Yes, valid ${label} ✅` : `No ${label} here ❌`);
-      }
+      // Try to detect a boolean-ish "found" value across possible response shapes
+      const data = response?.data || {};
+      const found =
+        !!data.is_fvg || !!data.is_ob || !!data.is_bb || !!data.found || !!data.result || !!data.success;
+
+      setLastResult(`${modeConfig.title} · ${found ? "YES ✅" : "NO ❌"}`);
+
+      // lightweight user feedback (could be swapped for a toast)
+      alert(found ? `${modeConfig.title} detected ✅` : `No ${modeConfig.title} found ❌`);
     } catch (err) {
       console.error("Check error:", err);
+      setLastResult(`${modeConfig.title} · Error`);
+      alert("Check failed — see console for details.");
     } finally {
       setChecking(null);
     }
@@ -98,7 +125,7 @@ const ChartPage = () => {
       <div className="chart-shell animate-fade-in">
         <header className="chart-header">
           <div>
-            <h1 className="chart-title">GBPUSD – 5m Candles</h1>
+            <h1 className="chart-title">{`GBPUSD – ${timeframe} Candles · ${modeConfig.title}`}</h1>
             <p className="chart-subtitle">ICT Training · Synthetic Feed</p>
           </div>
           <div className="chart-header-right">
@@ -139,47 +166,26 @@ const ChartPage = () => {
           )}
           <CandleChart
             candles={candles}
-            height={560}          // <- bump this up if you want it even taller
+            height={560}
             title="GBPUSD"
             timeframe={timeframe}
             onTimeframeChange={() => {}}
-            />
+          />
         </div>
 
         <div className="actions-row animate-slide-up-delayed">
-          <button
-            className={`action-btn action-fvg ${
-              checking === "FVG" ? "action-btn-loading" : ""
-            }`}
-            onClick={() => handleClick("fvg")}
-            disabled={checking !== null}
-          >
-            {checking === "FVG" ? "Checking FVG…" : "Check FVG"}
-          </button>
-
-          <button
-            className={`action-btn action-bull ${
-              checking === "Bullish Order Block" ? "action-btn-loading" : ""
-            }`}
-            onClick={() => handleClick("ob", "bullish")}
-            disabled={checking !== null}
-          >
-            {checking === "Bullish Order Block"
-              ? "Checking Bullish OB…"
-              : "Bullish Order Block"}
-          </button>
-
-          <button
-            className={`action-btn action-bear ${
-              checking === "Bearish Order Block" ? "action-btn-loading" : ""
-            }`}
-            onClick={() => handleClick("ob", "bearish")}
-            disabled={checking !== null}
-          >
-            {checking === "Bearish Order Block"
-              ? "Checking Bearish OB…"
-              : "Bearish Order Block"}
-          </button>
+          {modeConfig.actions.map((action) => (
+            <button
+              key={action.key}
+              className={`action-btn ${
+                action.label.toLowerCase().includes("bull") ? "action-bull" : action.label.toLowerCase().includes("bear") ? "action-bear" : "action-fvg"
+              } ${checking === action.label ? "action-btn-loading" : ""}`}
+              onClick={() => handleAction(action)}
+              disabled={checking !== null}
+            >
+              {checking === action.label ? `Checking ${action.label}…` : action.label}
+            </button>
+          ))}
         </div>
 
         {lastResult && (

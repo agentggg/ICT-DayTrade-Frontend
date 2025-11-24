@@ -1,0 +1,334 @@
+/* Full-page layout */
+.chart-menu {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background: radial-gradient(circle at top, #020617 0%, #020617 40%, #020617 100%);
+  color: #e5e7eb;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle animated background orbit */
+.chart-menu-bg-orbit {
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at 20% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 55%),
+    radial-gradient(circle at 80% 100%, rgba(147, 51, 234, 0.12) 0%, transparent 55%);
+  opacity: 0.9;
+  filter: blur(15px);
+  animation: bg-orbit 18s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes bg-orbit {
+  0% {
+    transform: translate3d(-10px, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(10px, 15px, 0) scale(1.05);
+  }
+}
+
+/* Shell card */
+.chart-menu-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: auto;
+  border-radius: 24px;
+  padding: 32px 28px 28px;
+  background: linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.95),
+      rgba(15, 23, 42, 0.98)
+    ),
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.28), transparent 60%);
+  box-shadow:
+    0 24px 80px rgba(15, 23, 42, 0.8),
+    0 0 0 1px rgba(148, 163, 184, 0.15);
+}
+
+/* Page fade-in for mount */
+.page-fade-in {
+  animation: pageFadeIn 480ms ease-out forwards;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+@keyframes pageFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.chart-menu-header {
+  margin-bottom: 28px;
+}
+
+.chart-menu-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #e5e7eb;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9), 0 0 24px rgba(56, 189, 248, 0.25);
+  backdrop-filter: blur(12px);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.9);
+  animation: pulse 1.2s ease-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.chart-menu-header h1 {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-size: clamp(26px, 3vw, 32px);
+  font-weight: 700;
+  color: #f9fafb;
+}
+
+.chart-menu-header p {
+  max-width: 520px;
+  font-size: 14px;
+  color: #9ca3af;
+  line-height: 1.6;
+}
+
+.highlight {
+  background: linear-gradient(120deg, #22c55e, #38bdf8, #a855f7);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Grid */
+.chart-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .chart-menu-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cards */
+.chart-menu-card {
+  position: relative;
+  border-radius: 18px;
+  padding: 18px 16px 14px;
+  background: radial-gradient(circle at top, rgba(15, 23, 42, 1), rgba(15, 23, 42, 0.98));
+  border: 1px solid rgba(51, 65, 85, 0.9);
+  color: #e5e7eb;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform 160ms ease-out,
+    box-shadow 160ms ease-out,
+    border-color 160ms ease-out,
+    background 160ms ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chart-menu-card-glow {
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 55%);
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+  pointer-events: none;
+}
+
+.chart-menu-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 22px 50px rgba(15, 23, 42, 0.8),
+    0 0 0 1px rgba(74, 222, 128, 0.35);
+  border-color: rgba(74, 222, 128, 0.5);
+  background: radial-gradient(circle at top, rgba(22, 163, 74, 0.22), rgba(15, 23, 42, 1));
+}
+
+.chart-menu-card:hover .chart-menu-card-glow {
+  opacity: 1;
+}
+
+/* card entrance animation */
+.float-in {
+  opacity: 0;
+  transform: translateY(10px) scale(0.99);
+  animation: floatIn 420ms ease-out forwards;
+}
+
+@keyframes floatIn {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Card content */
+.chart-menu-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 30% 0%, rgba(248, 250, 252, 0.25), transparent 60%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-menu-card-body {
+  flex: 1;
+}
+
+.chart-menu-tag {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+
+.chart-menu-card-body h2 {
+  font-size: 15px;
+  margin: 0 0 4px;
+  color: #f9fafb;
+}
+
+.chart-menu-card-body p {
+  font-size: 13px;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+/* Footer inside card */
+.chart-menu-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #a5b4fc;
+}
+
+.chart-menu-arrow {
+  display: inline-flex;
+  align-items: center;
+  transition: transform 160ms ease-out;
+}
+
+.chart-menu-card:hover .chart-menu-arrow {
+  transform: translateX(3px);
+}
+
+/* Bottom footer text */
+.chart-menu-footer {
+  margin-top: 22px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Confetti */
+.confetti-overlay {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -10px;
+  width: 6px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    #22c55e,
+    #38bdf8,
+    #a855f7,
+    #f97316
+  );
+  animation-name: confettiFall, confettiSpin;
+  animation-timing-function: ease-out, linear;
+  animation-iteration-count: 1, infinite;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translate3d(0, -10px, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 110vh, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes confettiSpin {
+  0% {
+    transform: rotateZ(0deg);
+  }
+  100% {
+    transform: rotateZ(360deg);
+  }
+}
+
+.confetti-label {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  color: #e5e7eb;
+  font-size: 12px;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  box-shadow: 0 14px 50px rgba(15, 23, 42, 0.85);
+}
+
+.confetti-label span {
+  color: #a5b4fc;
+}
