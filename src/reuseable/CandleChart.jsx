@@ -2,89 +2,115 @@
 import React, { useEffect, useRef } from "react";
 import { createChart } from "lightweight-charts";
 
-const CandleChart = ({ candles, height = 520 }) => {
+const CandleChart = ({
+  candles,
+  height = 560,
+  title,
+  timeframe,
+  obZones = [],
+  onCandleClick,
+}) => {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   const seriesRef = useRef(null);
+  const priceLinesRef = useRef([]);
+  const candlesRef = useRef([]);
+  const clickHandlerRef = useRef(null);
 
   // Create chart once
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    const chart = createChart(containerRef.current, {
-      width: containerRef.current.clientWidth,
+    const chart = createChart(container, {
       height,
-      layout: {
-        background: { color: "#020617" }, // Deep navy aesthetic
-        textColor: "#d1d4dc",
-      },
-      rightPriceScale: {
-        borderColor: "#334155",
-      },
-      timeScale: {
-        borderColor: "#334155",
-        rightOffset: 0,
-        barSpacing: 6,
-      },
+      layout: { background: { color: "#020617" }, textColor: "#cbd5f5" },
       grid: {
-        vertLines: { color: "#1e293b" },
-        horzLines: { color: "#1e293b" },
+        vertLines: { color: "#1f2937" },
+        horzLines: { color: "#1f2937" },
       },
+      timeScale: { borderVisible: false },
+      rightPriceScale: { borderVisible: false },
     });
 
-    const series = chart.addCandlestickSeries({
-      upColor: "#22c55e",     // Tailwind emerald-500
-      downColor: "#ef4444",   // Tailwind red-500
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: "#22c55e",
+      downColor: "#ef4444",
       borderVisible: false,
       wickUpColor: "#22c55e",
       wickDownColor: "#ef4444",
     });
 
     chartRef.current = chart;
-    seriesRef.current = series;
+    seriesRef.current = candleSeries;
 
-    const handleResize = () => {
-      if (!containerRef.current || !chartRef.current) return;
-      chartRef.current.applyOptions({
-        width: containerRef.current.clientWidth,
-        height,
-      });
+    const handleClick = (param) => {
+      if (!onCandleClick || !param.time) return;
+      const t = Number(param.time);
+      const found = candlesRef.current.find((c) => Number(c.time) === t);
+      if (found) onCandleClick(found);
     };
 
-    window.addEventListener("resize", handleResize);
+    clickHandlerRef.current = handleClick;
+    chart.subscribeClick(handleClick);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-      if (chartRef.current) {
-        chartRef.current.remove();
+      if (clickHandlerRef.current) {
+        chart.unsubscribeClick(clickHandlerRef.current);
       }
+      chart.remove();
+      chartRef.current = null;
+      seriesRef.current = null;
+      priceLinesRef.current = [];
     };
-  }, [height]);
+  }, [height, onCandleClick]);
 
-  // Update data when candles change
+  // Update candles
   useEffect(() => {
-    if (!seriesRef.current || !Array.isArray(candles) || candles.length === 0) return;
-
+    if (!seriesRef.current || !candles?.length) return;
+    candlesRef.current = candles;
     seriesRef.current.setData(candles);
-
-    if (chartRef.current) {
-      const ts = chartRef.current.timeScale();
-
-      // Ensure ALL candles show on screen
-      const first = candles[0].time;
-      const last = candles[candles.length - 1].time;
-
-      ts.setVisibleRange({ from: first, to: last });
-    }
   }, [candles]);
+
+  // Draw OB zones
+  useEffect(() => {
+    const series = seriesRef.current;
+    if (!series) return;
+
+    priceLinesRef.current.forEach((pl) => series.removePriceLine(pl));
+    priceLinesRef.current = [];
+
+    obZones.forEach((zone) => {
+      const color = zone.direction === "bullish" ? "#16a34a" : "#dc2626";
+
+      const topLine = series.createPriceLine({
+        price: zone.high,
+        color,
+        lineWidth: 2,
+        lineStyle: 0,
+        axisLabelVisible: true,
+        title: zone.direction === "bullish" ? "Bullish OB" : "Bearish OB",
+      });
+
+      const bottomLine = series.createPriceLine({
+        price: zone.low,
+        color,
+        lineWidth: 1,
+        lineStyle: 2,
+        axisLabelVisible: false,
+      });
+
+      priceLinesRef.current.push(topLine, bottomLine);
+    });
+  }, [obZones]);
 
   return (
     <div
       ref={containerRef}
       style={{
         width: "100%",
-        height: `${height}px`,
-        borderRadius: "14px",
+        height,
+        borderRadius: "1rem",
         overflow: "hidden",
       }}
     />

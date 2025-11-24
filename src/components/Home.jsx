@@ -6,7 +6,7 @@ import "./Home.css";
 const topics = [
   {
     id: "fvg",
-    route: "/chart?mode=fvg",
+    route: "/fvg",
     title: "Fair Value Gaps (FVG)",
     tag: "Imbalance • Liquidity",
     description:
@@ -15,7 +15,7 @@ const topics = [
   },
   {
     id: "ob",
-    route: "/chart?mode=ob",
+    route: "/ObPage",
     title: "Order Blocks",
     tag: "Smart Money • POI",
     description:
@@ -31,6 +31,7 @@ const topics = [
       "See how failed order blocks become breaker blocks and how to use them for trend reversals and entries.",
     emoji: "🧱",
   },
+  
 ];
 
 const Home = () => {
@@ -105,6 +106,16 @@ const Home = () => {
               </div>
             </button>
           ))}
+            <button
+              className="chart-menu-card float-in"
+              onClick={()=>{window.open('https://agentggg.github.io/DayTrade-ICT/', '_blank', 'noopener,noreferrer')}
+            }>
+                <div className="chart-menu-card-body">
+                <div className="chart-menu-tag">Learn</div>
+                {/* <h2>{topic.title}</h2>
+                <p>{topic.description}</p> */}
+              </div>
+            </button>
         </div>
 
         <div className="chart-menu-footer">
