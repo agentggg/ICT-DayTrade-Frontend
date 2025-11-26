@@ -31,7 +31,24 @@ const topics = [
       "See how failed order blocks become breaker blocks and how to use them for trend reversals and entries.",
     emoji: "🧱",
   },
-  
+  {
+    id: "tja",
+    route: "/",
+    title: "AI Driven Performance Insights",
+    tag: "SMC • Data-Driven",
+    description:
+      "Analyze weekly, monthly, and yearly PnL with color-coded charts, setup win-rates, psychology metrics, and a complete breakdown of your execution.",
+    emoji: "📈",
+  },
+  {
+  id: "learn",
+  route: "/",
+  title: "Trader Knowledge Hub",
+  tag: "ICT • Playbook",
+  description:
+    "A complete learning center with ICT tutorials, strategy breakdowns, concept definitions, examples, and structured trading notes—built to sharpen your edge every day.",
+  emoji: "📚",
+}
 ];
 
 const Home = () => {
@@ -47,6 +64,7 @@ const Home = () => {
   }, []);
 
   const handleClick = (topic) => {
+    console.log("🚀 ~ handleClick ~ topic:", topic)
     // play sound
     if (clickSound) {
       clickSound.currentTime = 0;
@@ -56,7 +74,12 @@ const Home = () => {
     // trigger confetti
     setSelectedTitle(topic.title);
     setIsCelebrating(true);
-
+    if (topic.id === "tja"){
+      window.open('https://agentggg.github.io/Daytrade-Tracker-Frontend/', '_parent', 'noopener,noreferrer')
+    }
+    if (topic.id === "learn"){
+      window.open('https://agentggg.github.io/DayTrade-ICT/', '_blank', 'noopener,noreferrer')
+    }
     // navigate after a short delay so user sees celebration
     setTimeout(() => {
       setIsCelebrating(false);
@@ -106,16 +129,6 @@ const Home = () => {
               </div>
             </button>
           ))}
-            <button
-              className="chart-menu-card float-in"
-              onClick={()=>{window.open('https://agentggg.github.io/DayTrade-ICT/', '_blank', 'noopener,noreferrer')}
-            }>
-                <div className="chart-menu-card-body">
-                <div className="chart-menu-tag">Learn</div>
-                {/* <h2>{topic.title}</h2>
-                <p>{topic.description}</p> */}
-              </div>
-            </button>
         </div>
 
         <div className="chart-menu-footer">
