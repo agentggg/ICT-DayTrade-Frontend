@@ -78,7 +78,7 @@ const Home = () => {
       window.open('https://agentggg.github.io/Daytrade-Tracker-Frontend/', '_parent', 'noopener,noreferrer')
     }
     if (topic.id === "learn"){
-      window.open('https://agentggg.github.io/DayTrade-ICT/', '_blank', 'noopener,noreferrer')
+      window.open('https://agentggg.github.io/DayTrade-ICT-Documentation/', '_blank', 'noopener,noreferrer')
     }
     // navigate after a short delay so user sees celebration
     setTimeout(() => {
